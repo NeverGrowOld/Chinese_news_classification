@@ -39,25 +39,18 @@ data:
 - validation set: 500*10
 - testing set: 1000*10
 
-从原数据集生成子集的过程请参看`helper`下的两个脚本。其中，`copy_data.sh`用于从每个分类拷贝6500个文件，`cnews_group.py`用于将多个文件整合到一个文件中。执行该文件后，得到三个数据文件：
+`helper`has two scripts。Among all，`copy_data.sh`is used to extract 6500sentences from data base，`cnews_group.py`is for merging multiple files into one file。After running those two scripts, we can get
 
-- cnews.train.txt: 训练集(50000条)
-- cnews.val.txt: 验证集(5000条)
-- cnews.test.txt: 测试集(10000条)
+- cnews.train.txt: (50000)
+- cnews.val.txt: (5000)
+- cnews.test.txt: (10000)
 
-## 预处理
+## preprocessing
 
-`data/cnews_loader.py`为数据的预处理文件。
+`data/cnews_loader.py` preprocesses the original data。
 
-- `read_file()`: 读取文件数据;
-- `build_vocab()`: 构建词汇表，使用字符级的表示，这一函数会将词汇表存储下来，避免每一次重复处理;
-- `read_vocab()`: 读取上一步存储的词汇表，转换为`{词：id}`表示;
-- `read_category()`: 将分类目录固定，转换为`{类别: id}`表示;
-- `to_words()`: 将一条由id表示的数据重新转换为文字;
-- `preocess_file()`: 将数据集从文字转换为固定长度的id序列表示;
-- `batch_iter()`: 为神经网络的训练准备经过shuffle的批次的数据。
 
-经过数据预处理，数据的格式如下：
+After preprocessing：
 
 | Data | Shape | Data | Shape |
 | :---------- | :---------- | :---------- | :---------- |
@@ -65,48 +58,48 @@ data:
 | x_val | [5000, 600] | y_val | [5000, 10] |
 | x_test | [10000, 600] | y_test | [10000, 10] |
 
-## CNN卷积神经网络
+## CNN
 
-### 配置项
+### configuration
 
-CNN可配置的参数如下所示，在`cnn_model.py`中。
+CNNconfiguration is in `cnn_model.py`.
 
 ```python
 class TCNNConfig(object):
-    """CNN配置参数"""
+    """CNN configurations"""
 
-    embedding_dim = 64      # 词向量维度
-    seq_length = 600        # 序列长度
-    num_classes = 10        # 类别数
-    num_filters = 128        # 卷积核数目
-    kernel_size = 5         # 卷积核尺寸
-    vocab_size = 5000       # 词汇表达小
+    embedding_dim = 64      # 
+    seq_length = 600        # 
+    num_classes = 10        # 
+    num_filters = 128        # 
+    kernel_size = 5         # 
+    vocab_size = 5000       # 
 
-    hidden_dim = 128        # 全连接层神经元
+    hidden_dim = 128        # fully-connected layer
 
-    dropout_keep_prob = 0.5 # dropout保留比例
-    learning_rate = 1e-3    # 学习率
+    dropout_keep_prob = 0.5 # dropout for overfitting
+    learning_rate = 1e-3    # 
 
-    batch_size = 64         # 每批训练大小
-    num_epochs = 10         # 总迭代轮次
+    batch_size = 64         # 
+    num_epochs = 10         # 
 
-    print_per_batch = 100    # 每多少轮输出一次结果
-    save_per_batch = 10      # 每多少轮存入tensorboard
+    print_per_batch = 100    # 
+    save_per_batch = 10      # 
 ```
 
-### CNN模型
+### CNNmodel
 
-具体参看`cnn_model.py`的实现。
+`cnn_model.py`
 
-大致结构如下：
+
 
 ![images/cnn_architecture](images/cnn_architecture.png)
 
-### 训练与验证
+### training and validation
 
-运行 `python run_cnn.py train`，可以开始训练。
+run `python run_cnn.py train` to start training process。
 
-> 若之前进行过训练，请把tensorboard/textcnn删除，避免TensorBoard多次训练结果重叠。
+
 
 ```
 Configuring CNN model...
@@ -139,16 +132,16 @@ Iter:   1800, Train Loss:  0.036, Train Acc: 100.00%, Val Loss:   0.28, Val Acc:
 No optimization for a long time, auto-stopping...
 ```
 
-在验证集上的最佳效果为94.12%，且只经过了3轮迭代就已经停止。
+Best result in validation data base is 94.12%。
 
-准确率和误差如图所示：
+Accuracy and loss：
 
 ![images](images/acc_loss.png)
 
 
-### 测试
+### testing
 
-运行 `python run_cnn.py test` 在测试集上进行测试。
+run `python run_cnn.py test` to test
 
 ```
 Configuring CNN model...
@@ -185,55 +178,55 @@ Confusion Matrix...
 Time usage: 0:00:05
 ```
 
-在测试集上的准确率达到了96.04%，且各类的precision, recall和f1-score都超过了0.9。
+Accuracy is over96.04%，precision, recalland f1-scoreare all over 0.9.
 
-从混淆矩阵也可以看出分类效果非常优秀。
 
-## RNN循环神经网络
 
-### 配置项
+## RNN
 
-RNN可配置的参数如下所示，在`rnn_model.py`中。
+### configuration
+
+RNN is in `rnn_model.py`
 
 ```python
 class TRNNConfig(object):
-    """RNN配置参数"""
+    """RNN"""
 
-    # 模型参数
-    embedding_dim = 64      # 词向量维度
-    seq_length = 600        # 序列长度
-    num_classes = 10        # 类别数
-    vocab_size = 5000       # 词汇表达小
+    
+    embedding_dim = 64      # 
+    seq_length = 600        # 
+    num_classes = 10        # 
+    vocab_size = 5000       # 
 
-    num_layers= 2           # 隐藏层层数
-    hidden_dim = 128        # 隐藏层神经元
-    rnn = 'gru'             # lstm 或 gru
+    num_layers= 2           # hidden layer
+    hidden_dim = 128        # neurons in hidden layer
+    rnn = 'gru'             # lstm or gru
 
-    dropout_keep_prob = 0.8 # dropout保留比例
-    learning_rate = 1e-3    # 学习率
+    dropout_keep_prob = 0.8 # dropout
+    learning_rate = 1e-3    # 
 
-    batch_size = 128         # 每批训练大小
-    num_epochs = 10          # 总迭代轮次
+    batch_size = 128         # 
+    num_epochs = 10          # 
 
-    print_per_batch = 100    # 每多少轮输出一次结果
-    save_per_batch = 10      # 每多少轮存入tensorboard
+    print_per_batch = 100    # 
+    save_per_batch = 10      # 
 ```
 
-### RNN模型
+### RNN model
 
-具体参看`rnn_model.py`的实现。
+`rnn_model.py`。
 
-大致结构如下：
+
 
 ![images/rnn_architecture](images/rnn_architecture.png)
 
-### 训练与验证
+### training and test
 
-> 这部分的代码与 run_cnn.py极为相似，只需要将模型和部分目录稍微修改。
 
-运行 `python run_rnn.py train`，可以开始训练。
 
-> 若之前进行过训练，请把tensorboard/textrnn删除，避免TensorBoard多次训练结果重叠。
+run `python run_rnn.py train`
+
+
 
 ```
 Configuring RNN model...
@@ -283,16 +276,16 @@ Iter:   3000, Train Loss:  0.061, Train Acc:  96.88%, Val Loss:   0.43, Val Acc:
 No optimization for a long time, auto-stopping...
 ```
 
-在验证集上的最佳效果为91.42%，经过了8轮迭代停止，速度相比CNN慢很多。
 
-准确率和误差如图所示：
+
+
 
 ![images](images/acc_loss_rnn.png)
 
 
 ### 测试
 
-运行 `python run_rnn.py test` 在测试集上进行测试。
+run `python run_rnn.py test` 
 
 ```
 Testing...
@@ -327,10 +320,4 @@ Confusion Matrix...
 Time usage: 0:00:33
 ```
 
-在测试集上的准确率达到了94.22%，且各类的precision, recall和f1-score，除了家居这一类别，都超过了0.9。
 
-从混淆矩阵可以看出分类效果非常优秀。
-
-对比两个模型，可见RNN除了在家居分类的表现不是很理想，其他几个类别较CNN差别不大。
-
-还可以通过进一步的调节参数，来达到更好的效果。
