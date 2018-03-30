@@ -6,7 +6,7 @@ CNNfor sentenve classfication: [Convolutional Neural Networks for Sentence Class
 
 [Implementing a CNN for Text Classification in TensorFlow](http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/)
 
-char-CNN的论文：[Character-level Convolutional Networks for Text Classification](https://arxiv.org/abs/1509.01626)
+char-CNN：[Character-level Convolutional Networks for Text Classification](https://arxiv.org/abs/1509.01626)
 
 (https://www.tensorflow.org/api_docs/python/tf/nn/conv1d)
 
@@ -283,7 +283,7 @@ No optimization for a long time, auto-stopping...
 ![images](images/acc_loss_rnn.png)
 
 
-### 测试
+### Testing
 
 run `python run_rnn.py test` 
 
